@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "Compario",
+    "slug": "compario",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "app.compario"
+    }
+  }
+}
+
