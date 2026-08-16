@@ -238,8 +238,12 @@ export default function Home() {
                   {selectedSchools.map((school) => <td key={school.id}>{school.admissions.oatPolicy}</td>)}
                 </tr>
                 <tr>
-                  <th scope="row">Average OAT</th>
+                  <th scope="row">Average OAT Academic Average (AA)</th>
                   {selectedSchools.map((school) => <td key={school.id}>{school.admissions.averageOat}</td>)}
+                </tr>
+                <tr>
+                  <th scope="row">Average OAT Total Science (TS)</th>
+                  {selectedSchools.map((school) => <td key={school.id}>{school.admissions.scienceOat ?? "Not published"}</td>)}
                 </tr>
                 <tr>
                   <th scope="row">Application deadline</th>
@@ -327,7 +331,8 @@ export default function Home() {
                 <div><dt>Admissions deadline</dt><dd>{school.admissions.deadline}</dd></div>
                 <div><dt>Avg. cumulative GPA</dt><dd>{school.admissions.averageGpa}</dd></div>
                 <div><dt>Avg. science GPA</dt><dd>{school.admissions.scienceGpa ?? "Not published"}</dd></div>
-                <div><dt>Average OAT</dt><dd>{school.admissions.averageOat}</dd></div>
+                <div><dt>Avg. OAT Academic (AA)</dt><dd>{school.admissions.averageOat}</dd></div>
+                <div><dt>Avg. OAT Science (TS)</dt><dd>{school.admissions.scienceOat ?? "Not published"}</dd></div>
                 <div><dt>Remediation</dt><dd className="pending">Handbook review pending</dd></div>
               </dl>
               <a className="source" href={school.tuition.source.url}>ASCO costs and outcomes</a>
