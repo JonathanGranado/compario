@@ -56,6 +56,7 @@ export type OptometrySchool = {
   boardPerformance: BoardPerformance | null;
   remediation: RemediationPolicy;
   admissions: AdmissionsProfile;
+  deepDive: SchoolDeepDive;
 };
 
 export type ComparisonWeights = {
@@ -263,6 +264,7 @@ export const schools: OptometrySchool[] = seeds.map((school) => ({
     source: remediationSource,
   },
   admissions: admissionsProfiles[school.code],
+  deepDive: schoolDeepDives[school.code],
 }));
 
 const normalize = (value: number, values: number[], higherIsBetter: boolean) => {
@@ -329,5 +331,7 @@ export function scoreSchool(
   return Math.round(score / totalWeight);
 }
 import { admissionsProfiles, type AdmissionsProfile } from "./admissions";
+import { schoolDeepDives, type SchoolDeepDive } from "./deep-dives";
 
 export { admissionsProfiles, type AdmissionsProfile } from "./admissions";
+export { schoolDeepDives, type SchoolDeepDive } from "./deep-dives";

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { ComparisonWeights, schools, scoreSchool } from "@compario/data";
 
 const money = new Intl.NumberFormat("en-US", {
@@ -314,7 +315,7 @@ export default function Home() {
                   {selectedIds.includes(school.id) ? "Selected" : "Compare"}
                 </button>
               </div>
-              <h3><a href={school.programUrl}>{school.name}</a></h3>
+              <h3><Link href={`/schools/${school.id}`}>{school.name}</Link></h3>
               <p>{school.city}, {school.state}</p>
               <dl>
                 <div><dt>Four-year direct cost</dt><dd>{money.format(fourYearDirectCost(school))}</dd></div>
