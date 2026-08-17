@@ -36,6 +36,16 @@ BoosterPrep is helpful for discovering school pages and understanding the
 applicant experience. A value should not be marked verified until it matches an
 official school, ASCO, ACOE, NBEO, or government source.
 
+## Entering-class refresh
+
+The ASCO Profile of the 2025 Optometry Entering Class is the standardized
+comparison source for GPA, OAT AA/TS, matriculants, and residence across all 25
+programs. School sites were also searched on August 16, 2026 using class-profile,
+entering-class, GPA, OAT, factbook, and student-outcomes keyword variants.
+Current school-published profiles were verified for AZCOPT, CCO, SCCO, Berkeley,
+ICO, MCO, and NECO and are retained as labeled cross-checks because schools may
+use different populations or definitions than ASCO.
+
 ## Remediation policy fields
 
 Store both the concise comparison and the original citation:
@@ -66,4 +76,3 @@ Store both the concise comparison and the original citation:
 3. Load the latest school-level NBEO report.
 4. Review one handbook end-to-end (SCCO is a good pilot), finalize the policy rubric, then process the remaining schools.
 5. Add saved shortlists, side-by-side comparison, authentication, and deploy.
-

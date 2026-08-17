@@ -30,6 +30,7 @@ type SortOption =
   | "partTwo"
   | "partThree"
   | "ultimate"
+  | "gpa"
   | "oatAcademic"
   | "oatScience"
   | "directCost"
@@ -41,6 +42,7 @@ const sortOptions: ReadonlyArray<{ value: SortOption; label: string }> = [
   { value: "partTwo", label: "Highest Part II first-time pass rate" },
   { value: "partThree", label: "Highest Part III first-time pass rate" },
   { value: "ultimate", label: "Highest ultimate all-parts pass rate" },
+  { value: "gpa", label: "Lowest entering-class average GPA" },
   { value: "oatAcademic", label: "Lowest entering-class OAT AA" },
   { value: "oatScience", label: "Lowest entering-class OAT TS" },
   { value: "directCost", label: "Lowest four-year direct cost" },
@@ -72,6 +74,7 @@ export default function Home() {
       if (option === "partTwo") return school.boardPerformance?.partTwoFirstTime ?? null;
       if (option === "partThree") return school.boardPerformance?.partThreeFirstTime ?? null;
       if (option === "ultimate") return school.boardPerformance?.ultimatePassRate ?? null;
+      if (option === "gpa") return school.enteringClass?.averageGpa ?? null;
       if (option === "oatAcademic") return school.enteringClass?.oatAcademicAverage ?? null;
       if (option === "oatScience") return school.enteringClass?.oatTotalScience ?? null;
       if (option === "departures") return school.departureRate.value;
@@ -80,6 +83,7 @@ export default function Home() {
     const lowerIsBetter = (option: SortOption) =>
       option === "oatAcademic" ||
       option === "oatScience" ||
+      option === "gpa" ||
       option === "directCost" ||
       option === "departures";
     const desirability = (school: RankedSchool, option: SortOption) => {
@@ -276,31 +280,35 @@ export default function Home() {
                   {selectedSchools.map((school) => <td key={school.id}>{school.admissions.minimumGpa}</td>)}
                 </tr>
                 <tr>
-                  <th scope="row">Average cumulative GPA</th>
+                  <th scope="row">School-profile cumulative GPA</th>
                   {selectedSchools.map((school) => <td key={school.id}>{school.admissions.averageGpa}</td>)}
                 </tr>
                 <tr>
-                  <th scope="row">Average science GPA</th>
+                  <th scope="row">School-profile science GPA</th>
                   {selectedSchools.map((school) => <td key={school.id}>{school.admissions.scienceGpa ?? "Not published"}</td>)}
+                </tr>
+                <tr>
+                  <th scope="row">2025 ASCO entering-class average GPA</th>
+                  {selectedSchools.map((school) => <td key={school.id}>{school.enteringClass?.averageGpa ?? "Not reported"}</td>)}
                 </tr>
                 <tr>
                   <th scope="row">OAT policy</th>
                   {selectedSchools.map((school) => <td key={school.id}>{school.admissions.oatPolicy}</td>)}
                 </tr>
                 <tr>
-                  <th scope="row">Average OAT Academic Average (AA)</th>
+                  <th scope="row">School-profile OAT Academic Average (AA)</th>
                   {selectedSchools.map((school) => <td key={school.id}>{school.admissions.averageOat}</td>)}
                 </tr>
                 <tr>
-                  <th scope="row">Average OAT Total Science (TS)</th>
+                  <th scope="row">School-profile OAT Total Science (TS)</th>
                   {selectedSchools.map((school) => <td key={school.id}>{school.admissions.scienceOat ?? "Not published"}</td>)}
                 </tr>
                 <tr>
-                  <th scope="row">2024 ASCO entering-class OAT AA</th>
+                  <th scope="row">2025 ASCO entering-class OAT AA</th>
                   {selectedSchools.map((school) => <td key={school.id}>{school.enteringClass?.oatAcademicAverage ?? "Not reported"}</td>)}
                 </tr>
                 <tr>
-                  <th scope="row">2024 ASCO entering-class OAT TS</th>
+                  <th scope="row">2025 ASCO entering-class OAT TS</th>
                   {selectedSchools.map((school) => <td key={school.id}>{school.enteringClass?.oatTotalScience ?? "Not reported"}</td>)}
                 </tr>
                 <tr>
@@ -415,12 +423,13 @@ export default function Home() {
                 <div><dt>Admissions deadline</dt><dd>{school.admissions.deadline}</dd></div>
                 <div><dt>Class size</dt><dd>{school.admissions.classSize}</dd></div>
                 <div><dt>Acceptance / enrollment</dt><dd>{school.admissions.acceptance}</dd></div>
-                <div><dt>Avg. cumulative GPA</dt><dd>{school.admissions.averageGpa}</dd></div>
-                <div><dt>Avg. science GPA</dt><dd>{school.admissions.scienceGpa ?? "Not published"}</dd></div>
-                <div><dt>Avg. OAT Academic (AA)</dt><dd>{school.admissions.averageOat}</dd></div>
-                <div><dt>Avg. OAT Science (TS)</dt><dd>{school.admissions.scienceOat ?? "Not published"}</dd></div>
-                <div><dt>2024 ASCO OAT AA</dt><dd>{school.enteringClass?.oatAcademicAverage ?? "Not reported"}</dd></div>
-                <div><dt>2024 ASCO OAT TS</dt><dd>{school.enteringClass?.oatTotalScience ?? "Not reported"}</dd></div>
+                <div><dt>School-profile GPA</dt><dd>{school.admissions.averageGpa}</dd></div>
+                <div><dt>School-profile science GPA</dt><dd>{school.admissions.scienceGpa ?? "Not published"}</dd></div>
+                <div><dt>2025 ASCO average GPA</dt><dd>{school.enteringClass?.averageGpa ?? "Not reported"}</dd></div>
+                <div><dt>School-profile OAT AA</dt><dd>{school.admissions.averageOat}</dd></div>
+                <div><dt>School-profile OAT TS</dt><dd>{school.admissions.scienceOat ?? "Not published"}</dd></div>
+                <div><dt>2025 ASCO OAT AA</dt><dd>{school.enteringClass?.oatAcademicAverage ?? "Not reported"}</dd></div>
+                <div><dt>2025 ASCO OAT TS</dt><dd>{school.enteringClass?.oatTotalScience ?? "Not reported"}</dd></div>
                 <div><dt>Remediation</dt><dd className="pending">Handbook review pending</dd></div>
               </dl>
               <a className="source" href={school.tuition.source.url}>ASCO costs and outcomes</a>

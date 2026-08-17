@@ -34,6 +34,7 @@ export default async function SchoolPage({
     ["Unknown", school.deepDive.demographics.unknown],
   ] as const;
   const enteringClass = school.enteringClass;
+  const schoolPublishedProfile = school.schoolPublishedClassProfile;
   const percent = (value: number, total: number) =>
     `${((value / total) * 100).toFixed(1)}%`;
 
@@ -78,7 +79,7 @@ export default async function SchoolPage({
       <section className="detail-section entering-class-section">
         <div className="section-heading">
           <p className="eyebrow">Standardized cohort</p>
-          <h2>2024 entering class</h2>
+          <h2>2025 entering class</h2>
           <p>ASCO uses the same definitions across participating schools.</p>
         </div>
         {enteringClass ? (
@@ -113,10 +114,31 @@ export default async function SchoolPage({
               These are matriculant residence percentages, not acceptance rates by residence.
               ASCO does not report accepted in-state and out-of-state counts in this table.
             </p>
+            {schoolPublishedProfile && (
+              <div className="school-published-profile">
+                <div className="section-heading">
+                  <p className="eyebrow">School-published cross-check</p>
+                  <h3>{schoolPublishedProfile.source.reportingPeriod}</h3>
+                </div>
+                <dl>
+                  <div><dt>Overall GPA</dt><dd>{schoolPublishedProfile.overallGpa}</dd></div>
+                  <div><dt>Science GPA</dt><dd>{schoolPublishedProfile.scienceGpa}</dd></div>
+                  <div><dt>OAT Academic Average</dt><dd>{schoolPublishedProfile.oatAcademicAverage}</dd></div>
+                  <div><dt>OAT Total Science</dt><dd>{schoolPublishedProfile.oatTotalScience}</dd></div>
+                  <div><dt>Cohort</dt><dd>{schoolPublishedProfile.cohort}</dd></div>
+                </dl>
+                {schoolPublishedProfile.source.note && (
+                  <p className="data-caveat">{schoolPublishedProfile.source.note}</p>
+                )}
+                <a className="source" href={schoolPublishedProfile.source.url}>
+                  {schoolPublishedProfile.source.label}
+                </a>
+              </div>
+            )}
             <a className="source" href={enteringClass.source.url}>{enteringClass.source.label}</a>
           </>
         ) : (
-          <p>No standardized 2024 entering-class profile was available for this new program.</p>
+          <p>No standardized entering-class profile is available.</p>
         )}
       </section>
 

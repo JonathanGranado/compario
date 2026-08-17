@@ -58,6 +58,7 @@ export type OptometrySchool = {
   admissions: AdmissionsProfile;
   deepDive: SchoolDeepDive;
   enteringClass: EnteringClassProfile | null;
+  schoolPublishedClassProfile: SchoolPublishedClassProfile | null;
 };
 
 export type ComparisonWeights = {
@@ -267,6 +268,7 @@ export const schools: OptometrySchool[] = seeds.map((school) => ({
   admissions: admissionsProfiles[school.code],
   deepDive: schoolDeepDives[school.code],
   enteringClass: enteringClassProfiles[school.code] ?? null,
+  schoolPublishedClassProfile: schoolPublishedClassProfiles[school.code] ?? null,
 }));
 
 const normalize = (value: number, values: number[], higherIsBetter: boolean) => {
@@ -335,7 +337,9 @@ export function scoreSchool(
 import { admissionsProfiles, type AdmissionsProfile } from "./admissions";
 import { schoolDeepDives, type SchoolDeepDive } from "./deep-dives";
 import { enteringClassProfiles, type EnteringClassProfile } from "./entering-class";
+import { schoolPublishedClassProfiles, type SchoolPublishedClassProfile } from "./school-class-profiles";
 
 export { admissionsProfiles, type AdmissionsProfile } from "./admissions";
 export { schoolDeepDives, type SchoolDeepDive } from "./deep-dives";
 export { enteringClassProfiles, type EnteringClassProfile } from "./entering-class";
+export { schoolPublishedClassProfiles, type SchoolPublishedClassProfile } from "./school-class-profiles";

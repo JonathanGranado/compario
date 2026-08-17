@@ -99,6 +99,8 @@ dd { margin: 0; text-align: right; font-weight: 700; }
 .bar-track span { display: block; height: 100%; background: var(--green); border-radius: inherit; }
 .demographic-row strong { text-align: right; }
 .entering-class-section { margin-top: 18px; }
+.school-published-profile { margin: 24px 0; padding: 22px; background: #eef6f2; border-radius: 12px; }
+.school-published-profile h3 { margin: 3px 0 0; font-family: Georgia, serif; font-size: 1.35rem; }
 .residency-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 22px 0; }
 .residency-grid article { display: flex; min-height: 145px; padding: 20px; flex-direction: column; background: var(--mint); border-radius: 12px; }
 .residency-grid strong { color: var(--green); font-family: Georgia, serif; font-size: 2.4rem; }
