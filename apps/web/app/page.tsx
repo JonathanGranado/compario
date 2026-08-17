@@ -43,7 +43,7 @@ export default function Home() {
     () =>
       schools
         .filter((school) =>
-          `${school.name} ${school.city} ${school.state}`.toLowerCase().includes(query.toLowerCase()),
+          `${school.ascoCode} ${school.name} ${school.city} ${school.state}`.toLowerCase().includes(query.toLowerCase()),
         )
         .map((school) => ({
           ...school,
@@ -254,6 +254,10 @@ export default function Home() {
                   {selectedSchools.map((school) => <td key={school.id}>{school.admissions.classSize}</td>)}
                 </tr>
                 <tr>
+                  <th scope="row">Acceptance / enrollment</th>
+                  {selectedSchools.map((school) => <td key={school.id}>{school.admissions.acceptance}</td>)}
+                </tr>
+                <tr>
                   <th scope="row">Interview</th>
                   {selectedSchools.map((school) => <td key={school.id}>{school.admissions.interview}</td>)}
                 </tr>
@@ -329,6 +333,8 @@ export default function Home() {
                   </>
                 )}
                 <div><dt>Admissions deadline</dt><dd>{school.admissions.deadline}</dd></div>
+                <div><dt>Class size</dt><dd>{school.admissions.classSize}</dd></div>
+                <div><dt>Acceptance / enrollment</dt><dd>{school.admissions.acceptance}</dd></div>
                 <div><dt>Avg. cumulative GPA</dt><dd>{school.admissions.averageGpa}</dd></div>
                 <div><dt>Avg. science GPA</dt><dd>{school.admissions.scienceGpa ?? "Not published"}</dd></div>
                 <div><dt>Avg. OAT Academic (AA)</dt><dd>{school.admissions.averageOat}</dd></div>
