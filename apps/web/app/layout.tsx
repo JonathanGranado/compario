@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./styles.css";
+import { ThemeInitializer } from "./theme-initializer";
 
 export const metadata: Metadata = {
   title: "Compario | Optometry school comparison",
@@ -15,7 +16,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <ThemeInitializer />
+        {children}
+      </body>
     </html>
   );
 }

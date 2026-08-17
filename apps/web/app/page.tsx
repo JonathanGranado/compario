@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ComparisonWeights, schools, scoreSchool } from "@compario/data";
 
@@ -49,6 +49,14 @@ const sortOptions: ReadonlyArray<{ value: SortOption; label: string }> = [
   { value: "departures", label: "Lowest students-leaving rate" },
 ];
 
+type ThemeOption = "botanical" | "moonlight" | "sherbet";
+
+const themeOptions: ReadonlyArray<{ value: ThemeOption; label: string; description: string }> = [
+  { value: "botanical", label: "Botanical", description: "Leafy and calm" },
+  { value: "moonlight", label: "Moonlight", description: "Lavender and dreamy" },
+  { value: "sherbet", label: "Sherbet", description: "Peachy and bright" },
+];
+
 export default function Home() {
   const [query, setQuery] = useState("");
   const [residency, setResidency] = useState<"resident" | "nonResident">("nonResident");
@@ -56,6 +64,35 @@ export default function Home() {
   const [selectedIds, setSelectedIds] = useState(["sccombku", "ucb"]);
   const [sortBy, setSortBy] = useState<SortOption>("fit");
   const [secondarySortBy, setSecondarySortBy] = useState<SortOption | "none">("none");
+  const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
+  const [theme, setTheme] = useState<ThemeOption>("botanical");
+  const [preferencesLoaded, setPreferencesLoaded] = useState(false);
+
+  useEffect(() => {
+    const savedFavorites = localStorage
+      .getItem("compario-favorites")
+      ?.split(",")
+      .filter((id) => schools.some((school) => school.id === id)) ?? [];
+    const savedTheme = localStorage.getItem("compario-theme");
+
+    setFavoriteIds([...new Set(savedFavorites)]);
+    if (themeOptions.some((option) => option.value === savedTheme)) {
+      setTheme(savedTheme as ThemeOption);
+    }
+    setPreferencesLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (!preferencesLoaded) return;
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem("compario-theme", theme);
+  }, [preferencesLoaded, theme]);
+
+  useEffect(() => {
+    if (preferencesLoaded) {
+      localStorage.setItem("compario-favorites", favoriteIds.join(","));
+    }
+  }, [favoriteIds, preferencesLoaded]);
 
   const ranked = useMemo(() => {
     const candidates = schools
@@ -139,6 +176,18 @@ export default function Home() {
           : current,
     );
 
+  const toggleFavorite = (id: string) =>
+    setFavoriteIds((current) =>
+      current.includes(id)
+        ? current.filter((favoriteId) => favoriteId !== id)
+        : [...current, id],
+    );
+
+  const favoriteSchools = favoriteIds.flatMap((id) => {
+    const school = schools.find((candidate) => candidate.id === id);
+    return school ? [school] : [];
+  });
+
   const fourYearDirectCost = (school: (typeof schools)[number]) =>
     school.directExpenses[residency].reduce((total, amount) => total + amount, 0);
 
@@ -148,6 +197,7 @@ export default function Home() {
   };
 
   return (
+    <div className="app-shell">
     <main>
       <header className="hero">
         <p className="eyebrow">Evidence before rankings</p>
@@ -393,14 +443,25 @@ export default function Home() {
             <div className="card-main">
               <div className="card-toolbar">
                 <p className="code">{school.ascoCode}</p>
-                <button
-                  type="button"
-                  className={selectedIds.includes(school.id) ? "compare-button selected" : "compare-button"}
-                  onClick={() => toggleSchool(school.id)}
-                  disabled={!selectedIds.includes(school.id) && selectedIds.length === 3}
-                >
-                  {selectedIds.includes(school.id) ? "Selected" : "Compare"}
-                </button>
+                <div className="card-actions">
+                  <button
+                    type="button"
+                    className={favoriteIds.includes(school.id) ? "favorite-button selected" : "favorite-button"}
+                    onClick={() => toggleFavorite(school.id)}
+                    aria-pressed={favoriteIds.includes(school.id)}
+                    disabled={!preferencesLoaded}
+                  >
+                    {favoriteIds.includes(school.id) ? "Favorited" : "Favorite"}
+                  </button>
+                  <button
+                    type="button"
+                    className={selectedIds.includes(school.id) ? "compare-button selected" : "compare-button"}
+                    onClick={() => toggleSchool(school.id)}
+                    disabled={!selectedIds.includes(school.id) && selectedIds.length === 3}
+                  >
+                    {selectedIds.includes(school.id) ? "Selected" : "Compare"}
+                  </button>
+                </div>
               </div>
               <h3><Link href={`/schools/${school.id}`}>{school.name}</Link></h3>
               <p>{school.city}, {school.state}</p>
@@ -440,5 +501,52 @@ export default function Home() {
         ))}
       </section>
     </main>
+      <aside className="favorites-panel" aria-label="Favorites and appearance">
+        <section>
+          <p className="eyebrow">Your shortlist</p>
+          <div className="favorites-heading">
+            <h2>Favorites</h2>
+            <span>{favoriteSchools.length}</span>
+          </div>
+          {favoriteSchools.length === 0 ? (
+            <p className="favorites-empty">Favorite schools from any card to keep them close.</p>
+          ) : (
+            <ul className="favorites-list">
+              {favoriteSchools.map((school) => (
+                <li key={school.id}>
+                  <Link href={`/schools/${school.id}`}>
+                    <span className="code">{school.ascoCode}</span>
+                    <strong>{school.name}</strong>
+                    <small>{school.city}, {school.state}</small>
+                  </Link>
+                  <button type="button" onClick={() => toggleFavorite(school.id)} aria-label={`Remove ${school.name} from favorites`}>
+                    Remove
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+        <section className="theme-picker">
+          <p className="eyebrow">Make it yours</p>
+          <h2>Theme</h2>
+          <div className="theme-options">
+            {themeOptions.map((option) => (
+              <button
+                type="button"
+                key={option.value}
+                className={theme === option.value ? "selected" : ""}
+                onClick={() => setTheme(option.value)}
+                aria-pressed={theme === option.value}
+                disabled={!preferencesLoaded}
+              >
+                <span className={`theme-swatch ${option.value}`} />
+                <span><strong>{option.label}</strong><small>{option.description}</small></span>
+              </button>
+            ))}
+          </div>
+        </section>
+      </aside>
+    </div>
   );
 }
