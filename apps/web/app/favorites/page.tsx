@@ -10,6 +10,7 @@ import {
   type SortOption,
 } from "../ranking";
 import { useFavorites } from "../use-favorites";
+import { BrandMark } from "../brand-mark";
 
 const money = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -38,6 +39,7 @@ export default function FavoritesPage() {
     <main className="favorites-page">
       <Link className="back-link" href="/">Back to all schools</Link>
       <header className="favorites-hero">
+        <BrandMark />
         <p className="eyebrow">Your private shortlist</p>
         <h1>Rank only the schools you love.</h1>
         <p className="lede">

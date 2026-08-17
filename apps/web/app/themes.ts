@@ -13,7 +13,7 @@ export const themeOptions: ReadonlyArray<{
   { value: "botanical", label: "Botanical" },
   { value: "moonlight", label: "Moonlight" },
   { value: "sherbet", label: "Sherbet" },
-  { value: "cozy-witch-cafe", label: "Cozy Witch Cafe" },
-  { value: "moonlit-cottage", label: "Moonlit Cottage" },
-  { value: "autumn-stardust", label: "Autumn Stardust" },
+  { value: "cozy-witch-cafe", label: "Warm Autumn Cafe" },
+  { value: "moonlit-cottage", label: "Dark Enchanted Forest" },
+  { value: "autumn-stardust", label: "Autumn Celestial" },
 ];

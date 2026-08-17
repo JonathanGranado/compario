@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ComparisonWeights, schools } from "@compario/data";
 import { initialWeights, rankSchools, sortOptions, type SortOption } from "./ranking";
 import { useFavorites } from "./use-favorites";
+import { BrandMark } from "./brand-mark";
 
 const money = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -72,6 +73,7 @@ export default function Home() {
     <div className="app-shell">
     <main>
       <header className="hero">
+        <BrandMark />
         <p className="eyebrow">Evidence before rankings</p>
         <h1>Find the optometry program that fits your priorities.</h1>
         <p className="lede">
