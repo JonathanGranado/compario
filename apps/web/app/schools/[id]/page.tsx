@@ -33,6 +33,9 @@ export default async function SchoolPage({
     ["Two or more races", school.deepDive.demographics.multiracial],
     ["Unknown", school.deepDive.demographics.unknown],
   ] as const;
+  const enteringClass = school.enteringClass;
+  const percent = (value: number, total: number) =>
+    `${((value / total) * 100).toFixed(1)}%`;
 
   return (
     <main className="detail-page">
@@ -70,6 +73,51 @@ export default async function SchoolPage({
           ))}
         </div>
         <a className="source" href={school.deepDive.source.url}>{school.deepDive.source.label}</a>
+      </section>
+
+      <section className="detail-section entering-class-section">
+        <div className="section-heading">
+          <p className="eyebrow">Standardized cohort</p>
+          <h2>2024 entering class</h2>
+          <p>ASCO uses the same definitions across participating schools.</p>
+        </div>
+        {enteringClass ? (
+          <>
+            <div className="residency-grid">
+              <article>
+                <strong>{enteringClass.inState}</strong>
+                <span>In-state matriculants</span>
+                <small>{percent(enteringClass.inState, enteringClass.matriculants)}</small>
+              </article>
+              <article>
+                <strong>{enteringClass.outOfState}</strong>
+                <span>Out-of-state domestic</span>
+                <small>{percent(enteringClass.outOfState, enteringClass.matriculants)}</small>
+              </article>
+              <article>
+                <strong>{enteringClass.international}</strong>
+                <span>Foreign country</span>
+                <small>{percent(enteringClass.international, enteringClass.matriculants)}</small>
+              </article>
+            </div>
+            <dl>
+              <div><dt>First-year slots</dt><dd>{enteringClass.slots}</dd></div>
+              <div><dt>Matriculants</dt><dd>{enteringClass.matriculants}</dd></div>
+              <div><dt>States represented</dt><dd>{enteringClass.statesRepresented}</dd></div>
+              <div><dt>Average GPA</dt><dd>{enteringClass.averageGpa}</dd></div>
+              <div><dt>Bachelor&apos;s degree</dt><dd>{enteringClass.bachelorsDegreePercent}%</dd></div>
+              <div><dt>OAT Academic Average</dt><dd>{enteringClass.oatAcademicAverage ?? "Not reported"}</dd></div>
+              <div><dt>OAT Total Science</dt><dd>{enteringClass.oatTotalScience ?? "Not reported"}</dd></div>
+            </dl>
+            <p className="data-caveat">
+              These are matriculant residence percentages, not acceptance rates by residence.
+              ASCO does not report accepted in-state and out-of-state counts in this table.
+            </p>
+            <a className="source" href={enteringClass.source.url}>{enteringClass.source.label}</a>
+          </>
+        ) : (
+          <p>No standardized 2024 entering-class profile was available for this new program.</p>
+        )}
       </section>
 
       <section className="detail-columns">
@@ -157,4 +205,3 @@ export default async function SchoolPage({
     </main>
   );
 }
-

@@ -96,6 +96,12 @@ dd { margin: 0; text-align: right; font-weight: 700; }
 .bar-track { height: 12px; overflow: hidden; background: var(--mint); border-radius: 999px; }
 .bar-track span { display: block; height: 100%; background: var(--green); border-radius: inherit; }
 .demographic-row strong { text-align: right; }
+.entering-class-section { margin-top: 18px; }
+.residency-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 22px 0; }
+.residency-grid article { display: flex; min-height: 145px; padding: 20px; flex-direction: column; background: var(--mint); border-radius: 12px; }
+.residency-grid strong { color: var(--green); font-family: Georgia, serif; font-size: 2.4rem; }
+.residency-grid span { margin-top: auto; font-weight: 700; }
+.residency-grid small { margin-top: 5px; color: var(--muted); }
 .data-caveat { padding: 12px; background: #fff5df; border-left: 3px solid var(--gold); font-size: .82rem; }
 .detail-section dl .total-row { margin-inline: -8px; padding-inline: 8px; }
 @media (max-width: 850px) {
@@ -105,6 +111,8 @@ dd { margin: 0; text-align: right; font-weight: 700; }
   .controls fieldset label { display: inline-flex; align-items: center; min-height: 44px; margin: 4px 18px 0 0; }
   .stat-grid { grid-template-columns: repeat(2, 1fr); }
   .detail-columns { grid-template-columns: 1fr; }
+  .residency-grid { grid-template-columns: 1fr; }
+  .residency-grid article { min-height: 115px; }
   .detail-columns .detail-section + .detail-section { margin-top: 0; }
 }
 @media (max-width: 560px) {
