@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./styles.css";
-import { ThemeInitializer } from "./theme-initializer";
+import { ThemeMenu } from "./theme-menu";
 
 export const metadata: Metadata = {
   title: "Compario | Optometry school comparison",
@@ -17,7 +17,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <body>
-        <ThemeInitializer />
+        <ThemeMenu />
         {children}
       </body>
     </html>

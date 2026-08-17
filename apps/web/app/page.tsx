@@ -1,21 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ComparisonWeights, schools, scoreSchool } from "@compario/data";
+import { ComparisonWeights, schools } from "@compario/data";
+import { initialWeights, rankSchools, sortOptions, type SortOption } from "./ranking";
+import { useFavorites } from "./use-favorites";
 
 const money = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
   maximumFractionDigits: 0,
 });
-
-const initialWeights: ComparisonWeights = {
-  tuition: 5,
-  boardPassRate: 5,
-  departures: 4,
-  livingExpenses: 3,
-};
 
 const boardRows = [
   ["Part I first-time", "partOneFirstTime"],
@@ -24,48 +19,6 @@ const boardRows = [
   ["Ultimate all-parts", "ultimatePassRate"],
 ] as const;
 
-type SortOption =
-  | "fit"
-  | "partOne"
-  | "partTwo"
-  | "partThree"
-  | "ultimate"
-  | "gpa"
-  | "oatAcademic"
-  | "oatScience"
-  | "directCost"
-  | "departures";
-
-const sortOptions: ReadonlyArray<{ value: SortOption; label: string }> = [
-  { value: "fit", label: "Overall fit score" },
-  { value: "partOne", label: "Highest Part I first-time pass rate" },
-  { value: "partTwo", label: "Highest Part II first-time pass rate" },
-  { value: "partThree", label: "Highest Part III first-time pass rate" },
-  { value: "ultimate", label: "Highest ultimate all-parts pass rate" },
-  { value: "gpa", label: "Lowest entering-class average GPA" },
-  { value: "oatAcademic", label: "Lowest entering-class OAT AA" },
-  { value: "oatScience", label: "Lowest entering-class OAT TS" },
-  { value: "directCost", label: "Lowest four-year direct cost" },
-  { value: "departures", label: "Lowest students-leaving rate" },
-];
-
-type ThemeOption =
-  | "botanical"
-  | "moonlight"
-  | "sherbet"
-  | "cozy-witch-cafe"
-  | "moonlit-cottage"
-  | "autumn-stardust";
-
-const themeOptions: ReadonlyArray<{ value: ThemeOption; label: string; description: string }> = [
-  { value: "botanical", label: "Botanical", description: "Leafy and calm" },
-  { value: "moonlight", label: "Moonlight", description: "Lavender and dreamy" },
-  { value: "sherbet", label: "Sherbet", description: "Peachy and bright" },
-  { value: "cozy-witch-cafe", label: "Cozy Witch Cafe", description: "Cinnamon and candlelight" },
-  { value: "moonlit-cottage", label: "Moonlit Cottage", description: "Dark forest and potions" },
-  { value: "autumn-stardust", label: "Autumn Stardust", description: "Dreamy rose and gold" },
-];
-
 export default function Home() {
   const [query, setQuery] = useState("");
   const [residency, setResidency] = useState<"resident" | "nonResident">("nonResident");
@@ -73,100 +26,22 @@ export default function Home() {
   const [selectedIds, setSelectedIds] = useState(["sccombku", "ucb"]);
   const [sortBy, setSortBy] = useState<SortOption>("fit");
   const [secondarySortBy, setSecondarySortBy] = useState<SortOption | "none">("none");
-  const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
-  const [theme, setTheme] = useState<ThemeOption>("botanical");
-  const [preferencesLoaded, setPreferencesLoaded] = useState(false);
+  const { favoriteIds, favoriteSchools, favoritesLoaded, toggleFavorite } = useFavorites();
 
-  useEffect(() => {
-    const savedFavorites = localStorage
-      .getItem("compario-favorites")
-      ?.split(",")
-      .filter((id) => schools.some((school) => school.id === id)) ?? [];
-    const savedTheme = localStorage.getItem("compario-theme");
-
-    setFavoriteIds([...new Set(savedFavorites)]);
-    if (themeOptions.some((option) => option.value === savedTheme)) {
-      setTheme(savedTheme as ThemeOption);
-    }
-    setPreferencesLoaded(true);
-  }, []);
-
-  useEffect(() => {
-    if (!preferencesLoaded) return;
-    document.documentElement.dataset.theme = theme;
-    localStorage.setItem("compario-theme", theme);
-  }, [preferencesLoaded, theme]);
-
-  useEffect(() => {
-    if (preferencesLoaded) {
-      localStorage.setItem("compario-favorites", favoriteIds.join(","));
-    }
-  }, [favoriteIds, preferencesLoaded]);
-
-  const ranked = useMemo(() => {
-    const candidates = schools
+  const ranked = useMemo(
+    () =>
+      rankSchools(
+        schools
         .filter((school) =>
           `${school.ascoCode} ${school.name} ${school.city} ${school.state}`.toLowerCase().includes(query.toLowerCase()),
-        )
-        .map((school) => ({
-          ...school,
-          score: scoreSchool(school, schools, weights, residency),
-        }));
-    type RankedSchool = (typeof candidates)[number];
-
-    const metricValue = (school: RankedSchool, option: SortOption): number | null => {
-      if (option === "fit") return school.score;
-      if (option === "partOne") return school.boardPerformance?.partOneFirstTime ?? null;
-      if (option === "partTwo") return school.boardPerformance?.partTwoFirstTime ?? null;
-      if (option === "partThree") return school.boardPerformance?.partThreeFirstTime ?? null;
-      if (option === "ultimate") return school.boardPerformance?.ultimatePassRate ?? null;
-      if (option === "gpa") return school.enteringClass?.averageGpa ?? null;
-      if (option === "oatAcademic") return school.enteringClass?.oatAcademicAverage ?? null;
-      if (option === "oatScience") return school.enteringClass?.oatTotalScience ?? null;
-      if (option === "departures") return school.departureRate.value;
-      return school.directExpenses[residency].reduce((total, amount) => total + amount, 0);
-    };
-    const lowerIsBetter = (option: SortOption) =>
-      option === "oatAcademic" ||
-      option === "oatScience" ||
-      option === "gpa" ||
-      option === "directCost" ||
-      option === "departures";
-    const desirability = (school: RankedSchool, option: SortOption) => {
-      const value = metricValue(school, option);
-      if (value === null) return null;
-      const values = candidates.flatMap((candidate) => {
-        const candidateValue = metricValue(candidate, option);
-        return candidateValue === null ? [] : [candidateValue];
-      });
-      const minimum = Math.min(...values);
-      const maximum = Math.max(...values);
-      if (minimum === maximum) return 1;
-      return lowerIsBetter(option)
-        ? (maximum - value) / (maximum - minimum)
-        : (value - minimum) / (maximum - minimum);
-    };
-
-    return candidates.sort((a, b) => {
-      const primaryA = desirability(a, sortBy);
-      const primaryB = desirability(b, sortBy);
-      if (secondarySortBy === "none") {
-        if (primaryA === null) return primaryB === null ? a.name.localeCompare(b.name) : 1;
-        if (primaryB === null) return -1;
-        return primaryB - primaryA || a.name.localeCompare(b.name);
-      }
-
-      const secondaryA = desirability(a, secondarySortBy);
-      const secondaryB = desirability(b, secondarySortBy);
-      const combinedA = primaryA === null || secondaryA === null ? null : primaryA + secondaryA;
-      const combinedB = primaryB === null || secondaryB === null ? null : primaryB + secondaryB;
-      if (combinedA === null) return combinedB === null ? a.name.localeCompare(b.name) : 1;
-      if (combinedB === null) return -1;
-      const primaryDifference =
-        primaryA === null || primaryB === null ? 0 : primaryB - primaryA;
-      return combinedB - combinedA || primaryDifference || a.name.localeCompare(b.name);
-    });
-  }, [query, residency, secondarySortBy, sortBy, weights]);
+        ),
+        weights,
+        residency,
+        sortBy,
+        secondarySortBy,
+      ),
+    [query, residency, secondarySortBy, sortBy, weights],
+  );
 
   const updateWeight = (key: keyof ComparisonWeights, value: string) =>
     setWeights((current) => ({ ...current, [key]: Number(value) }));
@@ -184,18 +59,6 @@ export default function Home() {
           ? [...current, id]
           : current,
     );
-
-  const toggleFavorite = (id: string) =>
-    setFavoriteIds((current) =>
-      current.includes(id)
-        ? current.filter((favoriteId) => favoriteId !== id)
-        : [...current, id],
-    );
-
-  const favoriteSchools = favoriteIds.flatMap((id) => {
-    const school = schools.find((candidate) => candidate.id === id);
-    return school ? [school] : [];
-  });
 
   const fourYearDirectCost = (school: (typeof schools)[number]) =>
     school.directExpenses[residency].reduce((total, amount) => total + amount, 0);
@@ -458,7 +321,7 @@ export default function Home() {
                     className={favoriteIds.includes(school.id) ? "favorite-button selected" : "favorite-button"}
                     onClick={() => toggleFavorite(school.id)}
                     aria-pressed={favoriteIds.includes(school.id)}
-                    disabled={!preferencesLoaded}
+                    disabled={!favoritesLoaded}
                   >
                     {favoriteIds.includes(school.id) ? "Favorited" : "Favorite"}
                   </button>
@@ -535,25 +398,7 @@ export default function Home() {
               ))}
             </ul>
           )}
-        </section>
-        <section className="theme-picker">
-          <p className="eyebrow">Make it yours</p>
-          <h2>Theme</h2>
-          <div className="theme-options">
-            {themeOptions.map((option) => (
-              <button
-                type="button"
-                key={option.value}
-                className={theme === option.value ? "selected" : ""}
-                onClick={() => setTheme(option.value)}
-                aria-pressed={theme === option.value}
-                disabled={!preferencesLoaded}
-              >
-                <span className={`theme-swatch ${option.value}`} />
-                <span><strong>{option.label}</strong><small>{option.description}</small></span>
-              </button>
-            ))}
-          </div>
+          <Link className="favorites-view-link" href="/favorites">Open favorites view</Link>
         </section>
       </aside>
     </div>
