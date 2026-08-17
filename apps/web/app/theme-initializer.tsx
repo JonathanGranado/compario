@@ -2,7 +2,14 @@
 
 import { useEffect } from "react";
 
-const themes = ["botanical", "moonlight", "sherbet"];
+const themes = [
+  "botanical",
+  "moonlight",
+  "sherbet",
+  "cozy-witch-cafe",
+  "moonlit-cottage",
+  "autumn-stardust",
+];
 
 export function ThemeInitializer() {
   useEffect(() => {

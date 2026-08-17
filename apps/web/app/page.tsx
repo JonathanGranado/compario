@@ -49,12 +49,21 @@ const sortOptions: ReadonlyArray<{ value: SortOption; label: string }> = [
   { value: "departures", label: "Lowest students-leaving rate" },
 ];
 
-type ThemeOption = "botanical" | "moonlight" | "sherbet";
+type ThemeOption =
+  | "botanical"
+  | "moonlight"
+  | "sherbet"
+  | "cozy-witch-cafe"
+  | "moonlit-cottage"
+  | "autumn-stardust";
 
 const themeOptions: ReadonlyArray<{ value: ThemeOption; label: string; description: string }> = [
   { value: "botanical", label: "Botanical", description: "Leafy and calm" },
   { value: "moonlight", label: "Moonlight", description: "Lavender and dreamy" },
   { value: "sherbet", label: "Sherbet", description: "Peachy and bright" },
+  { value: "cozy-witch-cafe", label: "Cozy Witch Cafe", description: "Cinnamon and candlelight" },
+  { value: "moonlit-cottage", label: "Moonlit Cottage", description: "Dark forest and potions" },
+  { value: "autumn-stardust", label: "Autumn Stardust", description: "Dreamy rose and gold" },
 ];
 
 export default function Home() {
