@@ -57,8 +57,10 @@ tbody td { font-weight: 700; }
 .results-heading { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin: 42px 0 16px; }
 .results-heading h2 { font-family: Georgia, serif; font-size: 2rem; margin: 0; }
 .results-heading p { color: var(--muted); font-size: .85rem; }
+.sort-controls { display: grid; grid-template-columns: repeat(2, minmax(190px, 1fr)); gap: 10px; }
 .sort-control { color: var(--muted); font-size: .78rem; font-weight: 800; }
 .sort-control select { display: block; min-height: 44px; margin-top: 6px; padding: 0 36px 0 12px; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 10px; font: inherit; }
+.sort-note { grid-column: 1 / -1; max-width: 470px; margin: 0; text-align: right; }
 .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
 .card { display: grid; grid-template-columns: 85px 1fr; background: var(--card); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
 .rank { display: flex; flex-direction: column; align-items: center; padding: 24px 10px; background: var(--mint); color: var(--green); }
@@ -124,8 +126,10 @@ dd { margin: 0; text-align: right; font-weight: 700; }
   .controls input[type="search"] { min-height: 48px; }
   .weights { grid-template-columns: 1fr; }
   .results-heading { display: block; }
+  .sort-controls { grid-template-columns: 1fr; margin-top: 16px; }
   .sort-control { display: block; margin-top: 16px; }
   .sort-control select { width: 100%; font-size: .88rem; }
+  .sort-note { grid-column: auto; text-align: left; }
   .comparison { padding: 20px 14px; }
   .comparison-heading { display: block; }
   .comparison-actions { margin-top: 14px; }

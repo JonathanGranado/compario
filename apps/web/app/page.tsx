@@ -30,8 +30,22 @@ type SortOption =
   | "partTwo"
   | "partThree"
   | "ultimate"
+  | "oatAcademic"
+  | "oatScience"
   | "directCost"
   | "departures";
+
+const sortOptions: ReadonlyArray<{ value: SortOption; label: string }> = [
+  { value: "fit", label: "Overall fit score" },
+  { value: "partOne", label: "Highest Part I first-time pass rate" },
+  { value: "partTwo", label: "Highest Part II first-time pass rate" },
+  { value: "partThree", label: "Highest Part III first-time pass rate" },
+  { value: "ultimate", label: "Highest ultimate all-parts pass rate" },
+  { value: "oatAcademic", label: "Lowest entering-class OAT AA" },
+  { value: "oatScience", label: "Lowest entering-class OAT TS" },
+  { value: "directCost", label: "Lowest four-year direct cost" },
+  { value: "departures", label: "Lowest students-leaving rate" },
+];
 
 export default function Home() {
   const [query, setQuery] = useState("");
@@ -39,35 +53,70 @@ export default function Home() {
   const [weights, setWeights] = useState(initialWeights);
   const [selectedIds, setSelectedIds] = useState(["sccombku", "ucb"]);
   const [sortBy, setSortBy] = useState<SortOption>("fit");
+  const [secondarySortBy, setSecondarySortBy] = useState<SortOption | "none">("none");
 
-  const ranked = useMemo(
-    () =>
-      schools
+  const ranked = useMemo(() => {
+    const candidates = schools
         .filter((school) =>
           `${school.ascoCode} ${school.name} ${school.city} ${school.state}`.toLowerCase().includes(query.toLowerCase()),
         )
         .map((school) => ({
           ...school,
           score: scoreSchool(school, schools, weights, residency),
-        }))
-        .sort((a, b) => {
-          const boardValue = (
-            school: typeof a,
-            field: "partOneFirstTime" | "partTwoFirstTime" | "partThreeFirstTime" | "ultimatePassRate",
-          ) => school.boardPerformance?.[field] ?? -1;
-          const directCost = (school: typeof a) =>
-            school.directExpenses[residency].reduce((total, amount) => total + amount, 0);
+        }));
+    type RankedSchool = (typeof candidates)[number];
 
-          if (sortBy === "partOne") return boardValue(b, "partOneFirstTime") - boardValue(a, "partOneFirstTime");
-          if (sortBy === "partTwo") return boardValue(b, "partTwoFirstTime") - boardValue(a, "partTwoFirstTime");
-          if (sortBy === "partThree") return boardValue(b, "partThreeFirstTime") - boardValue(a, "partThreeFirstTime");
-          if (sortBy === "ultimate") return boardValue(b, "ultimatePassRate") - boardValue(a, "ultimatePassRate");
-          if (sortBy === "directCost") return directCost(a) - directCost(b);
-          if (sortBy === "departures") return (a.departureRate.value ?? Number.POSITIVE_INFINITY) - (b.departureRate.value ?? Number.POSITIVE_INFINITY);
-          return (b.score ?? -1) - (a.score ?? -1);
-        }),
-    [query, residency, sortBy, weights],
-  );
+    const metricValue = (school: RankedSchool, option: SortOption): number | null => {
+      if (option === "fit") return school.score;
+      if (option === "partOne") return school.boardPerformance?.partOneFirstTime ?? null;
+      if (option === "partTwo") return school.boardPerformance?.partTwoFirstTime ?? null;
+      if (option === "partThree") return school.boardPerformance?.partThreeFirstTime ?? null;
+      if (option === "ultimate") return school.boardPerformance?.ultimatePassRate ?? null;
+      if (option === "oatAcademic") return school.enteringClass?.oatAcademicAverage ?? null;
+      if (option === "oatScience") return school.enteringClass?.oatTotalScience ?? null;
+      if (option === "departures") return school.departureRate.value;
+      return school.directExpenses[residency].reduce((total, amount) => total + amount, 0);
+    };
+    const lowerIsBetter = (option: SortOption) =>
+      option === "oatAcademic" ||
+      option === "oatScience" ||
+      option === "directCost" ||
+      option === "departures";
+    const desirability = (school: RankedSchool, option: SortOption) => {
+      const value = metricValue(school, option);
+      if (value === null) return null;
+      const values = candidates.flatMap((candidate) => {
+        const candidateValue = metricValue(candidate, option);
+        return candidateValue === null ? [] : [candidateValue];
+      });
+      const minimum = Math.min(...values);
+      const maximum = Math.max(...values);
+      if (minimum === maximum) return 1;
+      return lowerIsBetter(option)
+        ? (maximum - value) / (maximum - minimum)
+        : (value - minimum) / (maximum - minimum);
+    };
+
+    return candidates.sort((a, b) => {
+      const primaryA = desirability(a, sortBy);
+      const primaryB = desirability(b, sortBy);
+      if (secondarySortBy === "none") {
+        if (primaryA === null) return primaryB === null ? a.name.localeCompare(b.name) : 1;
+        if (primaryB === null) return -1;
+        return primaryB - primaryA || a.name.localeCompare(b.name);
+      }
+
+      const secondaryA = desirability(a, secondarySortBy);
+      const secondaryB = desirability(b, secondarySortBy);
+      const combinedA = primaryA === null || secondaryA === null ? null : primaryA + secondaryA;
+      const combinedB = primaryB === null || secondaryB === null ? null : primaryB + secondaryB;
+      if (combinedA === null) return combinedB === null ? a.name.localeCompare(b.name) : 1;
+      if (combinedB === null) return -1;
+      const primaryDifference =
+        primaryA === null || primaryB === null ? 0 : primaryB - primaryA;
+      return combinedB - combinedA || primaryDifference || a.name.localeCompare(b.name);
+    });
+  }, [query, residency, secondarySortBy, sortBy, weights]);
 
   const updateWeight = (key: keyof ComparisonWeights, value: string) =>
     setWeights((current) => ({ ...current, [key]: Number(value) }));
@@ -247,6 +296,14 @@ export default function Home() {
                   {selectedSchools.map((school) => <td key={school.id}>{school.admissions.scienceOat ?? "Not published"}</td>)}
                 </tr>
                 <tr>
+                  <th scope="row">2024 ASCO entering-class OAT AA</th>
+                  {selectedSchools.map((school) => <td key={school.id}>{school.enteringClass?.oatAcademicAverage ?? "Not reported"}</td>)}
+                </tr>
+                <tr>
+                  <th scope="row">2024 ASCO entering-class OAT TS</th>
+                  {selectedSchools.map((school) => <td key={school.id}>{school.enteringClass?.oatTotalScience ?? "Not reported"}</td>)}
+                </tr>
+                <tr>
                   <th scope="row">Application deadline</th>
                   {selectedSchools.map((school) => <td key={school.id}>{school.admissions.deadline}</td>)}
                 </tr>
@@ -285,18 +342,40 @@ export default function Home() {
           <h2>{ranked.length} programs</h2>
           <p>Fit scores only use available metrics with a non-zero weight.</p>
         </div>
-        <label className="sort-control">
-          Sort by
-          <select value={sortBy} onChange={(event) => setSortBy(event.target.value as SortOption)}>
-            <option value="fit">Overall fit score</option>
-            <option value="partOne">Part I first-time pass rate</option>
-            <option value="partTwo">Part II first-time pass rate</option>
-            <option value="partThree">Part III first-time pass rate</option>
-            <option value="ultimate">Ultimate all-parts pass rate</option>
-            <option value="directCost">Lowest four-year direct cost</option>
-            <option value="departures">Lowest students-leaving rate</option>
-          </select>
-        </label>
+        <div className="sort-controls">
+          <label className="sort-control">
+            First criterion
+            <select
+              value={sortBy}
+              onChange={(event) => {
+                const nextSort = event.target.value as SortOption;
+                setSortBy(nextSort);
+                if (secondarySortBy === nextSort) setSecondarySortBy("none");
+              }}
+            >
+              {sortOptions.map((option) => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
+            </select>
+          </label>
+          <label className="sort-control">
+            Combine with
+            <select
+              value={secondarySortBy}
+              onChange={(event) => setSecondarySortBy(event.target.value as SortOption | "none")}
+            >
+              <option value="none">No second criterion</option>
+              {sortOptions.map((option) => (
+                <option key={option.value} value={option.value} disabled={option.value === sortBy}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          {secondarySortBy !== "none" && (
+            <p className="sort-note">Both criteria are balanced equally; schools missing either value rank last.</p>
+          )}
+        </div>
       </div>
 
       <section className="grid">
@@ -340,6 +419,8 @@ export default function Home() {
                 <div><dt>Avg. science GPA</dt><dd>{school.admissions.scienceGpa ?? "Not published"}</dd></div>
                 <div><dt>Avg. OAT Academic (AA)</dt><dd>{school.admissions.averageOat}</dd></div>
                 <div><dt>Avg. OAT Science (TS)</dt><dd>{school.admissions.scienceOat ?? "Not published"}</dd></div>
+                <div><dt>2024 ASCO OAT AA</dt><dd>{school.enteringClass?.oatAcademicAverage ?? "Not reported"}</dd></div>
+                <div><dt>2024 ASCO OAT TS</dt><dd>{school.enteringClass?.oatTotalScience ?? "Not reported"}</dd></div>
                 <div><dt>Remediation</dt><dd className="pending">Handbook review pending</dd></div>
               </dl>
               <a className="source" href={school.tuition.source.url}>ASCO costs and outcomes</a>
